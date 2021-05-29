@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#define MAX_CMD_NAME_LENGTH 16
-
 typedef uint8_t (*ReadCallback)(char *str, uint8_t maxlen);
 typedef uint8_t (*WriteCallback)(char *str);
 
@@ -13,7 +11,7 @@ typedef void (*CmdHelpCallback)();
 
 typedef struct
 {
-	char			Command[MAX_CMD_NAME_LENGTH];
+	char*			Command;
 	CmdCallback		Callback;
 	CmdHelpCallback HelpCallback;
 } CLICommand;

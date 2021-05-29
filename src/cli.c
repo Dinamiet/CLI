@@ -3,7 +3,8 @@
 #include <stddef.h>
 #include <string.h>
 
-#define MAX_CMD_LINE_LENGTH 32
+#define MAX_CMD_LINE_LENGTH 64
+#define MAX_ARGC 8
 
 CLICommand *  cliCmdList	   = NULL;
 ReadCallback  cliReadCallback  = NULL;
@@ -23,7 +24,7 @@ void CLI_ProcessCommand(char *commandLine)
 	if (commandLine == NULL) // No command passed to be processed go and read
 	{
 		// Ensure there is space in buffer
-		if (MAX_CMD_LINE_LENGTH - bufferIndex)
+		if (bufferIndex >= MAX_CMD_LINE_LENGTH)
 		{
 			cliWriteCallback("Buffer full, executing...\n");
 			commandLine = cmdBuffer;
@@ -33,9 +34,8 @@ void CLI_ProcessCommand(char *commandLine)
 			uint8_t numRead = cliReadCallback(&cmdBuffer[bufferIndex], MAX_CMD_LINE_LENGTH - bufferIndex);
 			bufferIndex += numRead;
 			if (numRead == 0)
-			{
 				return;
-			}
+
 			char *newLine = strchr(cmdBuffer, '\n');
 			if (newLine != NULL) // check for newline in command
 			{
@@ -48,13 +48,13 @@ void CLI_ProcessCommand(char *commandLine)
 	// There is something to execute
 	if (commandLine != NULL)
 	{
-		char *		argv[MAX_CMD_NAME_LENGTH];
+		char *		argv[MAX_ARGC];
 		char *		token = NULL;
 		const char *split = " ";
 		int			argc  = 0;
 
 		token = strtok(commandLine, split);
-		while (token != NULL)
+		while (token != NULL && argc < MAX_ARGC)
 		{
 			argv[argc++] = token;
 			token		 = strtok(NULL, split);
@@ -85,6 +85,7 @@ void CLI_Cmd(int argc, char *argv[])
 	if (argc < 2)
 	{
 		CLI_Help();
+		return;
 	}
 
 	CLICommand *currentCommand = cliCmdList;
@@ -95,6 +96,7 @@ void CLI_Cmd(int argc, char *argv[])
 			currentCommand->HelpCallback();
 			return;
 		}
+		currentCommand++;
 	}
 
 	CLI_Help();
@@ -111,6 +113,7 @@ void CLI_Help()
 	{
 		cliWriteCallback("\t");
 		cliWriteCallback(currentCommand->Command);
+		currentCommand++;
 	}
 	cliWriteCallback("\n");
 }
