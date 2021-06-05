@@ -2,14 +2,16 @@
 
 #include <stdio.h>
 #include <string.h>
-#define UNUSED(x) (void)(x)
 
 void testing(CLI *cli, int argc, char *argv[])
 {
-	UNUSED(cli);
 	if (argc == 1)
 	{
-		printf("Compile Date: %s - %s\n", __TIME__, __DATE__);
+		cli->Write("Compile Date:");
+		cli->Write(__TIME__);
+		cli->Write(" - ");
+		cli->Write(__DATE__);
+		cli->Write("\n");
 		return;
 	}
 	for (int i = 0; i < argc; i++) { printf("argv[%d]: %s\n", i, argv[i]); }
@@ -17,8 +19,7 @@ void testing(CLI *cli, int argc, char *argv[])
 
 void testingHelp(CLI *cli)
 {
-	UNUSED(cli);
-	printf("\n\nHelp of testing command\n\n");
+	cli->Write("\n\nHelp of testing command\n\n");
 }
 
 CLICommand commands[] = {{"help", CLI_Cmd, CLI_Help}, {"testing", testing, testingHelp}, {0, 0, 0}};
