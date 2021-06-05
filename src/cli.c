@@ -4,20 +4,16 @@
 #include <string.h>
 
 #define MAX_CMD_LINE_LENGTH 64
-#define MAX_ARGC 8
+#define MAX_ARGC			8
 
-CLICommand *  cliCmdList	   = NULL;
-ReadCallback  cliReadCallback  = NULL;
-WriteCallback cliWriteCallback = NULL;
-
-void CLI_Init(CLICommand *cmdList, ReadCallback readCallback, WriteCallback writeCallback)
+void CLI_Init(CLI *cli, CLICommand *cmdList, InterfaceRead readFunc, InterfaceWrite writeFunc)
 {
-	cliCmdList		 = cmdList;
-	cliReadCallback	 = readCallback;
-	cliWriteCallback = writeCallback;
+	cli->Commands = cmdList;
+	cli->Read	  = readFunc;
+	cli->Write	  = writeFunc;
 }
 
-void CLI_ProcessCommand(char *commandLine)
+void CLI_ProcessCommand(CLI *cli, char *commandLine)
 {
 	static char		cmdBuffer[MAX_CMD_LINE_LENGTH + 1]; // add one for 0
 	static uint32_t bufferIndex = 0;
@@ -26,12 +22,12 @@ void CLI_ProcessCommand(char *commandLine)
 		// Ensure there is space in buffer
 		if (bufferIndex >= MAX_CMD_LINE_LENGTH)
 		{
-			cliWriteCallback("Buffer full, executing...\n");
+			cli->Write("Buffer full, executing...\n");
 			commandLine = cmdBuffer;
 		}
 		else
 		{
-			uint8_t numRead = cliReadCallback(&cmdBuffer[bufferIndex], MAX_CMD_LINE_LENGTH - bufferIndex);
+			uint8_t numRead = cli->Read(&cmdBuffer[bufferIndex], MAX_CMD_LINE_LENGTH - bufferIndex);
 			bufferIndex += numRead;
 			if (numRead == 0)
 				return;
@@ -63,12 +59,12 @@ void CLI_ProcessCommand(char *commandLine)
 		if (argc == 0)
 			return;
 
-		CLICommand *currentCommand = cliCmdList;
+		CLICommand *currentCommand = cli->Commands;
 		while (currentCommand->Command)
 		{
 			if (strncmp(currentCommand->Command, argv[0], strlen(currentCommand->Command)) == 0) // Match
 			{
-				currentCommand->Callback(argc, argv);
+				currentCommand->Callback(cli, argc, argv);
 				memset(cmdBuffer, 0, MAX_CMD_LINE_LENGTH + 1); // clear buffer
 				bufferIndex = 0;
 				return;
@@ -76,44 +72,44 @@ void CLI_ProcessCommand(char *commandLine)
 			currentCommand++;
 		}
 
-		cliWriteCallback("Command not found\n");
+		cli->Write("Command not found\n");
 	}
 }
 
-void CLI_Cmd(int argc, char *argv[])
+void CLI_Cmd(CLI *cli, int argc, char *argv[])
 {
 	if (argc < 2)
 	{
-		CLI_Help();
+		CLI_Help(cli);
 		return;
 	}
 
-	CLICommand *currentCommand = cliCmdList;
+	CLICommand *currentCommand = cli->Commands;
 	while (currentCommand->Command)
 	{
 		if (strncmp(currentCommand->Command, argv[1], strlen(currentCommand->Command)) == 0) // Match
 		{
-			currentCommand->HelpCallback();
+			currentCommand->HelpCallback(cli);
 			return;
 		}
 		currentCommand++;
 	}
 
-	CLI_Help();
+	CLI_Help(cli);
 }
 
-void CLI_Help()
+void CLI_Help(CLI *cli)
 {
-	cliWriteCallback("\nUsage:\n");
-	cliWriteCallback("\thelp [command]\n");
-	cliWriteCallback("\nwhere command is one of the following:\n\n");
+	cli->Write("\nUsage:\n");
+	cli->Write("\thelp [command]\n");
+	cli->Write("\nwhere command is one of the following:\n\n");
 
-	CLICommand *currentCommand = cliCmdList;
+	CLICommand *currentCommand = cli->Commands;
 	while (currentCommand->Command)
 	{
-		cliWriteCallback("\t");
-		cliWriteCallback(currentCommand->Command);
+		cli->Write("\t");
+		cli->Write(currentCommand->Command);
 		currentCommand++;
 	}
-	cliWriteCallback("\n");
+	cli->Write("\n");
 }

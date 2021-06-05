@@ -3,22 +3,31 @@
 
 #include <stdint.h>
 
-typedef uint8_t (*ReadCallback)(char *str, uint8_t maxlen);
-typedef uint8_t (*WriteCallback)(char *str);
+typedef struct CLICommand CLICommand;
 
-typedef void (*CmdCallback)(int argc, char *argv[]);
-typedef void (*CmdHelpCallback)();
+typedef uint8_t (*InterfaceRead)(char *str, uint8_t maxlen);
+typedef uint8_t (*InterfaceWrite)(char *str);
 
 typedef struct
 {
-	char*			Command;
-	CmdCallback		Callback;
-	CmdHelpCallback HelpCallback;
-} CLICommand;
+	CLICommand *   Commands;
+	InterfaceRead  Read;
+	InterfaceWrite Write;
+} CLI;
 
-void CLI_Init(CLICommand *cmdList, ReadCallback readCallback, WriteCallback writeCallback);
-void CLI_ProcessCommand(char *commandLine);
-void CLI_Cmd(int argc, char *argv[]);
-void CLI_Help();
+typedef void (*CmdFunc)(CLI *cli, int argc, char *argv[]);
+typedef void (*CmdHelpFunc)(CLI *cli);
+
+struct CLICommand
+{
+	char *		Command;
+	CmdFunc		Callback;
+	CmdHelpFunc HelpCallback;
+};
+
+void CLI_Init(CLI *cli, CLICommand *cmdList, InterfaceRead readCallback, InterfaceWrite writeCallback);
+void CLI_ProcessCommand(CLI *cli, char *commandLine);
+void CLI_Cmd(CLI *cli, int argc, char *argv[]);
+void CLI_Help(CLI *cli);
 
 #endif

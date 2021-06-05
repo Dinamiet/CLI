@@ -2,9 +2,11 @@
 
 #include <stdio.h>
 #include <string.h>
+#define UNUSED(x) (void)(x)
 
-void testing(int argc, char *argv[])
+void testing(CLI *cli, int argc, char *argv[])
 {
+	UNUSED(cli);
 	if (argc == 1)
 	{
 		printf("Compile Date: %s - %s\n", __TIME__, __DATE__);
@@ -13,7 +15,11 @@ void testing(int argc, char *argv[])
 	for (int i = 0; i < argc; i++) { printf("argv[%d]: %s\n", i, argv[i]); }
 }
 
-void testingHelp() { printf("\n\nHelp of testing command\n\n"); }
+void testingHelp(CLI *cli)
+{
+	UNUSED(cli);
+	printf("\n\nHelp of testing command\n\n");
+}
 
 CLICommand commands[] = {{"help", CLI_Cmd, CLI_Help}, {"testing", testing, testingHelp}, {0, 0, 0}};
 
@@ -30,11 +36,12 @@ uint8_t writeData(char *str) { return printf("%s", str); }
 
 int main()
 {
-	CLI_Init(commands, readData, writeData);
+	CLI cli;
+	CLI_Init(&cli, commands, readData, writeData);
 
-	CLI_ProcessCommand("help");
+	CLI_ProcessCommand(&cli, "help");
 
-	CLI_ProcessCommand(NULL);
+	CLI_ProcessCommand(&cli, NULL);
 
 	return 0;
 }
