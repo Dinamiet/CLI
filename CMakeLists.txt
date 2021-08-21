@@ -7,6 +7,8 @@ project(
     CLI
 )
 
+if (NOT TARGET ${PROJECT_NAME}) # Only configure if not already configured
+
 add_library(
     ${PROJECT_NAME}
     STATIC
@@ -55,3 +57,5 @@ target_sources(
     PRIVATE # All private source and header files listed here
         src/cli.c
 )
+
+endif()
