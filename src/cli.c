@@ -16,7 +16,7 @@ void CLI_Init(CLI *cli, CLICommand *cmdList, InterfaceRead readFunc, InterfaceWr
 void CLI_ProcessCommand(CLI *cli, char *commandLine)
 {
 	static char		cmdBuffer[MAX_CMD_LINE_LENGTH + 1]; // add one for 0
-	static uint32_t bufferIndex = 0;
+	static uint8_t bufferIndex = 0;
 	if (commandLine == NULL) // No command passed to be processed go and read
 	{
 		// Ensure there is space in buffer
