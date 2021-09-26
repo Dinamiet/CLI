@@ -28,8 +28,21 @@ void CLI_ProcessCommand(CLI *cli, char *commandLine)
 		else
 		{
 			size_t numRead = cli->Read(&cmdBuffer[bufferIndex], MAX_CMD_LINE_LENGTH - bufferIndex);
+
 			if (numRead == 0)
 				return;
+
+			char *backSpace = strchr(cmdBuffer, 0x7F); // Check if backspace in cmd
+			while (backSpace && bufferIndex)
+			{
+				*backSpace = '\0';
+				strcpy(backSpace-1, backSpace+1);
+				numRead--;
+				bufferIndex--;
+				backSpace = strchr(backSpace-1, 0x7F); // Search for more backspaces
+			}
+
+			bufferIndex += numRead;
 
 			char *newLine = strchr(cmdBuffer, '\n');
 			if (newLine != NULL) // check for newline in command
@@ -105,7 +118,7 @@ void CLI_Help(CLI *cli)
 {
 	cli->Write("\nUsage:\n");
 	cli->Write("\thelp [command]\n");
-	cli->Write("\nwhere command is one of the following:\n\n");
+	cli->Write("\nwhere command is one of the following:\n");
 
 	CLICommand *currentCommand = cli->Commands;
 	while (currentCommand->Command)
