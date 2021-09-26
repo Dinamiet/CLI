@@ -6,14 +6,14 @@
 #define MAX_CMD_LINE_LENGTH 64
 #define MAX_ARGC			8
 
-void CLI_Init(CLI *cli, CLICommand *cmdList, InterfaceRead readFunc, InterfaceWrite writeFunc)
+void CLI_Init(CLI* cli, CLICommand* cmdList, InterfaceRead readFunc, InterfaceWrite writeFunc)
 {
 	cli->Commands = cmdList;
 	cli->Read	  = readFunc;
 	cli->Write	  = writeFunc;
 }
 
-void CLI_ProcessCommand(CLI *cli, char *commandLine)
+void CLI_ProcessCommand(CLI* cli, char* commandLine)
 {
 	static char	  cmdBuffer[MAX_CMD_LINE_LENGTH + 1] = {0}; // add one for '\0'
 	static size_t bufferIndex						 = 0;
@@ -32,19 +32,19 @@ void CLI_ProcessCommand(CLI *cli, char *commandLine)
 			if (numRead == 0)
 				return;
 
-			char *backSpace = strchr(cmdBuffer, 0x7F); // Check if backspace in cmd
+			char* backSpace = strchr(cmdBuffer, 0x7F); // Check if backspace in cmd
 			while (backSpace && bufferIndex)
 			{
 				*backSpace = '\0';
-				strcpy(backSpace-1, backSpace+1);
+				strcpy(backSpace - 1, backSpace + 1);
 				numRead--;
 				bufferIndex--;
-				backSpace = strchr(backSpace-1, 0x7F); // Search for more backspaces
+				backSpace = strchr(backSpace - 1, 0x7F); // Search for more backspaces
 			}
 
 			bufferIndex += numRead;
 
-			char *newLine = strchr(cmdBuffer, '\n');
+			char* newLine = strchr(cmdBuffer, '\n');
 			if (newLine != NULL) // check for newline in command
 			{
 				*newLine	= '\0'; // terminate command;
@@ -56,9 +56,9 @@ void CLI_ProcessCommand(CLI *cli, char *commandLine)
 	// There is something to execute
 	if (commandLine != NULL)
 	{
-		char *		argv[MAX_ARGC];
-		char *		token = NULL;
-		const char *split = " ";
+		char*		argv[MAX_ARGC];
+		char*		token = NULL;
+		const char* split = " ";
 		int			argc  = 0;
 
 		token = strtok(commandLine, split);
@@ -72,7 +72,7 @@ void CLI_ProcessCommand(CLI *cli, char *commandLine)
 		if (argc == 0)
 			goto ClearCmdBuffer;
 
-		CLICommand *currentCommand = cli->Commands;
+		CLICommand* currentCommand = cli->Commands;
 		while (currentCommand->Command)
 		{
 			if (strncmp(currentCommand->Command, argv[0], strlen(currentCommand->Command)) == 0) // Match
@@ -92,7 +92,7 @@ void CLI_ProcessCommand(CLI *cli, char *commandLine)
 	cli->Write(cmdBuffer);
 }
 
-void CLI_Cmd(CLI *cli, int argc, char *argv[])
+void CLI_Cmd(CLI* cli, int argc, char* argv[])
 {
 	if (argc < 2)
 	{
@@ -100,7 +100,7 @@ void CLI_Cmd(CLI *cli, int argc, char *argv[])
 		return;
 	}
 
-	CLICommand *currentCommand = cli->Commands;
+	CLICommand* currentCommand = cli->Commands;
 	while (currentCommand->Command)
 	{
 		if (strncmp(currentCommand->Command, argv[1], strlen(currentCommand->Command)) == 0) // Match
@@ -114,13 +114,13 @@ void CLI_Cmd(CLI *cli, int argc, char *argv[])
 	CLI_Help(cli);
 }
 
-void CLI_Help(CLI *cli)
+void CLI_Help(CLI* cli)
 {
 	cli->Write("\nUsage:\n");
 	cli->Write("\thelp [command]\n");
 	cli->Write("\nwhere command is one of the following:\n");
 
-	CLICommand *currentCommand = cli->Commands;
+	CLICommand* currentCommand = cli->Commands;
 	while (currentCommand->Command)
 	{
 		cli->Write("\t");
