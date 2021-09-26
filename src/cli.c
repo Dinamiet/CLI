@@ -55,8 +55,9 @@ void CLI_ProcessCommand(CLI *cli, char *commandLine)
 			token		 = strtok(NULL, split);
 		}
 
+		cli->Write("\n");
 		if (argc == 0)
-			return;
+			goto ClearCmdBuffer;
 
 		CLICommand *currentCommand = cli->Commands;
 		while (currentCommand->Command)
@@ -64,15 +65,18 @@ void CLI_ProcessCommand(CLI *cli, char *commandLine)
 			if (strncmp(currentCommand->Command, argv[0], strlen(currentCommand->Command)) == 0) // Match
 			{
 				currentCommand->Callback(cli, argc, argv);
-				memset(cmdBuffer, 0, MAX_CMD_LINE_LENGTH + 1); // clear buffer
-				bufferIndex = 0;
-				return;
+				goto ClearCmdBuffer;
 			}
 			currentCommand++;
 		}
 
-		cli->Write("Command not found\n");
+		cli->Write("Command not found");
+	ClearCmdBuffer:
+		memset(cmdBuffer, 0, sizeof(cmdBuffer)); // clear buffer
+		bufferIndex = 0;
 	}
+	cli->Write("\r>");
+	cli->Write(cmdBuffer);
 }
 
 void CLI_Cmd(CLI *cli, int argc, char *argv[])
