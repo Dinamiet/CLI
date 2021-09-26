@@ -2,11 +2,12 @@
 #define __CLI_H__
 
 #include <stdint.h>
+#include <stddef.h>
 
 typedef struct CLICommand CLICommand;
 
-typedef uint8_t (*InterfaceRead)(char *str, uint8_t maxlen);
-typedef uint8_t (*InterfaceWrite)(char *str);
+typedef size_t (*InterfaceRead)(char *str, size_t max);
+typedef size_t (*InterfaceWrite)(char *str);
 
 typedef struct
 {
