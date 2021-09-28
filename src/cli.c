@@ -83,7 +83,7 @@ void CLI_ProcessCommand(CLI* cli, char* commandLine)
 			currentCommand++;
 		}
 
-		cli->Write("Command not found");
+		cli->Write("Command not found\n");
 	ClearCmdBuffer:
 		memset(cmdBuffer, 0, sizeof(cmdBuffer)); // clear buffer
 		bufferIndex = 0;
