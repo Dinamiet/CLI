@@ -96,7 +96,15 @@ void CLI_Cmd(CLI* cli, int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		CLI_Help(cli);
+		cli->Write("Available commands:\n");
+		CLICommand* currentCommand = cli->Commands;
+		while (currentCommand->Command)
+		{
+			cli->Write("\t");
+			cli->Write(currentCommand->Command);
+			currentCommand++;
+		}
+		cli->Write("\n");
 		return;
 	}
 
@@ -105,27 +113,21 @@ void CLI_Cmd(CLI* cli, int argc, char* argv[])
 	{
 		if (strncmp(currentCommand->Command, argv[1], strlen(currentCommand->Command)) == 0) // Match
 		{
-			currentCommand->HelpCallback(cli);
+			size_t index= 0;
+			while (currentCommand->Help[index] != 0)
+			{
+				cli->Write(currentCommand->Help[index++]);
+				cli->Write("\n");
+			}
 			return;
 		}
 		currentCommand++;
 	}
-
-	CLI_Help(cli);
 }
 
-void CLI_Help(CLI* cli)
+char* CLI_Help[]=
 {
-	cli->Write("\nUsage:\n");
-	cli->Write("\thelp [command]\n");
-	cli->Write("\nwhere command is one of the following:\n");
-
-	CLICommand* currentCommand = cli->Commands;
-	while (currentCommand->Command)
-	{
-		cli->Write("\t");
-		cli->Write(currentCommand->Command);
-		currentCommand++;
-	}
-	cli->Write("\n");
-}
+	"Prints available commands",
+	"Usage: help [cmd]",
+	0
+};
