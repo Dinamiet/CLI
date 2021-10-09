@@ -39,6 +39,7 @@ void CLI_ProcessCommand(CLI* cli, char* commandLine)
 				strcpy(backSpace - 1, backSpace + 1);
 				numRead--;
 				bufferIndex--;
+				cli->Write("\b "); // Clear char on interface
 				backSpace = strchr(backSpace - 1, 0x7F); // Search for more backspaces
 			}
 
