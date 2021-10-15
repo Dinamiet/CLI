@@ -99,11 +99,12 @@ void CLI_Cmd(CLI* cli, int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		cli->Write("Available commands:\n");
+		cli->Write("Available commands:");
 		CLICommand* currentCommand = cli->Commands;
+		size_t index= 0;
 		while (currentCommand->Command)
 		{
-			cli->Write("\t");
+			cli->Write((index++ % 4) ? "\t" : "\n\t");
 			cli->Write(currentCommand->Command);
 			currentCommand++;
 		}
