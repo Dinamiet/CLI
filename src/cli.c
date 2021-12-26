@@ -39,7 +39,7 @@ void CLI_ProcessCommand(CLI* cli, char* commandLine)
 				strcpy(backSpace - 1, backSpace + 1);
 				numRead--;
 				bufferIndex--;
-				cli->Write("\b "); // Clear char on interface
+				cli->Write("\b ");						 // Clear char on interface
 				backSpace = strchr(backSpace - 1, 0x7F); // Search for more backspaces
 			}
 
@@ -101,7 +101,7 @@ void CLI_Cmd(CLI* cli, int argc, char* argv[])
 	{
 		cli->Write("Available commands:");
 		CLICommand* currentCommand = cli->Commands;
-		size_t index= 0;
+		size_t		index		   = 0;
 		while (currentCommand->Command)
 		{
 			cli->Write((index++ % 4) ? "\t" : "\n\t");
@@ -117,7 +117,7 @@ void CLI_Cmd(CLI* cli, int argc, char* argv[])
 	{
 		if (strncmp(currentCommand->Command, argv[1], strlen(currentCommand->Command)) == 0) // Match
 		{
-			size_t index= 0;
+			size_t index = 0;
 			while (currentCommand->Help[index] != 0)
 			{
 				cli->Write(currentCommand->Help[index++]);
@@ -129,9 +129,4 @@ void CLI_Cmd(CLI* cli, int argc, char* argv[])
 	}
 }
 
-char* CLI_Help[]=
-{
-	"Prints available commands",
-	"Usage: help [cmd]",
-	0
-};
+char* CLI_Help[] = {"Prints available commands", "Usage: help [cmd]", 0};
