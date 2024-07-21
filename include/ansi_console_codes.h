@@ -18,7 +18,7 @@
 #define LF  "\n" // Line feed control character
 #define FF  "\f" // Form feed control character
 #define CR  "\r" // Carriage return control character
-#define ESC "\e" // Escape control character
+#define ESC "\033" // Escape control character
 
 /**
  * ANSI escape sequences
