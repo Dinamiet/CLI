@@ -4,19 +4,19 @@
 #include <string.h>
 
 #define MAX_CMD_LINE_LENGTH 64
-#define MAX_ARGC			8
+#define MAX_ARGC            8
 
 void CLI_Init(CLI* cli, CLICommand* cmdList, InterfaceRead readFunc, InterfaceWrite writeFunc)
 {
 	cli->Commands = cmdList;
-	cli->Read	  = readFunc;
-	cli->Write	  = writeFunc;
+	cli->Read     = readFunc;
+	cli->Write    = writeFunc;
 }
 
 void CLI_ProcessCommand(CLI* cli, char* commandLine)
 {
-	static char	  cmdBuffer[MAX_CMD_LINE_LENGTH + 1] = {0}; // add one for '\0'
-	static size_t bufferIndex						 = 0;
+	static char   cmdBuffer[MAX_CMD_LINE_LENGTH + 1] = {0}; // add one for '\0'
+	static size_t bufferIndex                        = 0;
 	if (commandLine == NULL) // No command passed to be processed go and read
 	{
 		// Ensure there is space in buffer
@@ -39,7 +39,7 @@ void CLI_ProcessCommand(CLI* cli, char* commandLine)
 				strcpy(backSpace - 1, backSpace + 1);
 				numRead--;
 				bufferIndex--;
-				cli->Write("\b ");						 // Clear char on interface
+				cli->Write("\b ");                       // Clear char on interface
 				backSpace = strchr(backSpace - 1, 0x7F); // Search for more backspaces
 			}
 
@@ -48,7 +48,7 @@ void CLI_ProcessCommand(CLI* cli, char* commandLine)
 			char* newLine = strchr(cmdBuffer, '\n');
 			if (newLine != NULL) // check for newline in command
 			{
-				*newLine	= '\0'; // terminate command;
+				*newLine    = '\0'; // terminate command;
 				commandLine = cmdBuffer;
 			}
 		}
@@ -57,16 +57,16 @@ void CLI_ProcessCommand(CLI* cli, char* commandLine)
 	// There is something to execute
 	if (commandLine != NULL)
 	{
-		char*		argv[MAX_ARGC];
-		char*		token = NULL;
+		char*       argv[MAX_ARGC];
+		char*       token = NULL;
 		const char* split = " ";
-		int			argc  = 0;
+		int         argc  = 0;
 
 		token = strtok(commandLine, split);
 		while (token != NULL && argc < MAX_ARGC)
 		{
 			argv[argc++] = token;
-			token		 = strtok(NULL, split);
+			token        = strtok(NULL, split);
 		}
 
 		cli->Write("\n");
@@ -101,7 +101,7 @@ void CLI_Cmd(CLI* cli, int argc, char* argv[])
 	{
 		cli->Write("Available commands:");
 		CLICommand* currentCommand = cli->Commands;
-		size_t		index		   = 0;
+		size_t      index          = 0;
 		while (currentCommand->Command)
 		{
 			cli->Write((index++ % 4) ? "\t" : "\n\t");
@@ -129,4 +129,8 @@ void CLI_Cmd(CLI* cli, int argc, char* argv[])
 	}
 }
 
-char* CLI_Help[] = {"Prints available commands", "Usage: help [cmd]", 0};
+char* CLI_Help[] = {
+		"Prints available commands",
+		"Usage: help [cmd]",
+		0,
+};
