@@ -20,7 +20,7 @@ void CLI_Process(CLI* cli)
 
 	if (commandLength >= MAX_CMD_LINE_LENGTH)
 	{
-		CLI_Write(cli, "\r\n%s\r\n", "Buffer full, executing...");
+		CLI_Write(cli, LF "Buffer full, executing..." LF);
 		haveCommand = true;
 	}
 	else
@@ -78,7 +78,7 @@ void CLI_DoCommand(CLI* cli, char* command)
 		token        = strtok(NULL, split);
 	}
 
-	CLI_Write(cli, "%s", LF);
+	CLI_Write(cli, LF);
 	if (argc == 0) // Empty command
 		goto do_command_done;
 
@@ -115,14 +115,14 @@ void CLI_Cmd(CLI* cli, int argc, char* argv[])
 	// When no args are provided with command - just list all commands
 	if (argc < 2)
 	{
-		CLI_Write(cli, "%s", "Available commands:");
+		CLI_Write(cli, "Available commands:");
 		size_t      index          = 0;
 		while (currentCommand->Command)
 		{
 			CLI_Write(cli, (index++ % 4) ? HT "%s" : LF HT "%s", currentCommand->Command);
 			currentCommand++;
 		}
-		CLI_Write(cli, "%s", LF);
+		CLI_Write(cli, LF);
 		return;
 	}
 
