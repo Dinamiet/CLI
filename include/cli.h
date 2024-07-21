@@ -33,7 +33,7 @@ typedef struct _CLI_
 {
 	char*             Prompt;
 	CLICommand*       CommandList;
-	char              WorkingCommand[MAX_CMD_LINE_LENGTH + 1];
+	char              WorkingCommand[MAX_CMD_LINE_LENGTH];
 	CLI_ReadFunction  Read;
 	CLI_WriteFunction Write;
 } CLI;
