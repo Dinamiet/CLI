@@ -6,11 +6,12 @@
 #define MAX_CMD_LINE_LENGTH 64
 #define MAX_ARGC            8
 
-void CLI_Init(CLI* cli, CLICommand* cmdList, InterfaceRead readFunc, InterfaceWrite writeFunc)
+void CLI_Init(CLI* cli, char* prompt, CLICommand* cmdList, CLI_ReadFunction read, CLI_WriteFunction write)
 {
-	cli->Commands = cmdList;
-	cli->Read     = readFunc;
-	cli->Write    = writeFunc;
+	cli->Prompt      = prompt;
+	cli->CommandList = cmdList;
+	cli->Read        = read;
+	cli->Write       = write;
 }
 
 void CLI_ProcessCommand(CLI* cli, char* commandLine)
@@ -60,7 +61,7 @@ void CLI_ProcessCommand(CLI* cli, char* commandLine)
 		char*       argv[MAX_ARGC];
 		char*       token = NULL;
 		const char* split = " ";
-		int         argc  = 0;
+		size_t      argc  = 0;
 
 		token = strtok(commandLine, split);
 		while (token != NULL && argc < MAX_ARGC)
@@ -73,12 +74,12 @@ void CLI_ProcessCommand(CLI* cli, char* commandLine)
 		if (argc == 0)
 			goto ClearCmdBuffer;
 
-		CLICommand* currentCommand = cli->Commands;
+		CLICommand* currentCommand = cli->CommandList;
 		while (currentCommand->Command)
 		{
 			if (strncmp(currentCommand->Command, argv[0], strlen(currentCommand->Command)) == 0) // Match
 			{
-				currentCommand->Callback(cli, argc, argv);
+				currentCommand->CmdFunc(cli, argc, argv);
 				goto ClearCmdBuffer;
 			}
 			currentCommand++;
@@ -100,7 +101,7 @@ void CLI_Cmd(CLI* cli, int argc, char* argv[])
 	if (argc < 2)
 	{
 		cli->Write("Available commands:");
-		CLICommand* currentCommand = cli->Commands;
+		CLICommand* currentCommand = cli->CommandList;
 		size_t      index          = 0;
 		while (currentCommand->Command)
 		{
@@ -112,7 +113,7 @@ void CLI_Cmd(CLI* cli, int argc, char* argv[])
 		return;
 	}
 
-	CLICommand* currentCommand = cli->Commands;
+	CLICommand* currentCommand = cli->CommandList;
 	while (currentCommand->Command)
 	{
 		if (strncmp(currentCommand->Command, argv[1], strlen(currentCommand->Command)) == 0) // Match
