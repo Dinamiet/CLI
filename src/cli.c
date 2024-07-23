@@ -5,7 +5,7 @@
 
 #define MAX_ARGC            8
 
-void CLI_Init(CLI* cli, char* prompt, CLICommand* cmdList, CLI_ReadFunction read, CLI_WriteFunction write)
+void CLI_Init(CLI* cli, const char* prompt, const CLICommand* cmdList, const CLI_ReadFunction read, const CLI_WriteFunction write)
 {
 	cli->Prompt      = prompt;
 	cli->CommandList = cmdList;
@@ -60,18 +60,21 @@ void CLI_Process(CLI* cli)
 	}
 }
 
-void CLI_DoCommand(CLI* cli, char* command)
+void CLI_DoCommand(const CLI* cli, const char* command)
 {
+	char cmd[MAX_CMD_LINE_LENGTH + 1];
 	if (!command)
 		return;
 
-	char*       argv[MAX_ARGC];
+	strncpy(cmd, command, MAX_CMD_LINE_LENGTH);
+
+	const char* argv[MAX_ARGC];
 	char*       token = NULL;
 	const char* split = " ";
 	size_t      argc  = 0;
 
 	// Tokenize command
-	token = strtok(command, split);
+	token = strtok(cmd, split);
 	while (token && argc < MAX_ARGC)
 	{
 		argv[argc++] = token;
@@ -82,7 +85,7 @@ void CLI_DoCommand(CLI* cli, char* command)
 	if (argc == 0) // Empty command
 		goto do_command_done;
 
-	CLICommand* currentCommand = cli->CommandList;
+	const CLICommand* currentCommand = cli->CommandList;
 	while (currentCommand->Command)
 	{
 		if (strcmp(currentCommand->Command, argv[0]) == 0) // Match
@@ -98,7 +101,7 @@ do_command_done:
 	CLI_Write(cli, CR "%s", cli->Prompt);
 }
 
-size_t CLI_Write(CLI* cli, char* format, ...)
+size_t CLI_Write(const CLI* cli, const char* format, ...)
 {
 	va_list args;
 	va_start(args, format);
@@ -107,11 +110,11 @@ size_t CLI_Write(CLI* cli, char* format, ...)
 	return written;
 }
 
-size_t CLI_Read(CLI* cli, char* str, size_t max) { return cli->Read(str, max); }
+size_t CLI_Read(const CLI* cli, char* str, const size_t max) { return cli->Read(str, max); }
 
-void CLI_Cmd(CLI* cli, int argc, char* argv[])
+void CLI_Cmd(const CLI* cli, const size_t argc, const char* argv[])
 {
-	CLICommand* currentCommand = cli->CommandList;
+	const CLICommand* currentCommand = cli->CommandList;
 	// When no args are provided with command - just list all commands
 	if (argc < 2)
 	{
@@ -139,7 +142,7 @@ void CLI_Cmd(CLI* cli, int argc, char* argv[])
 	}
 }
 
-char* CLI_Help[] = {
+const char* CLI_Help[] = {
 		"Prints available commands",
 		"Usage: help [cmd]",
 		0,

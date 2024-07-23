@@ -18,33 +18,33 @@
 
 typedef struct _CLI_ CLI;
 
-typedef void (*CLI_CommandFunction)(CLI* cli, size_t argc, char* argv[]);
-typedef size_t (*CLI_ReadFunction)(char* str, size_t max);
-typedef size_t (*CLI_WriteFunction)(char* format, va_list params);
+typedef void (*CLI_CommandFunction)(const CLI* cli, const size_t argc, const char* argv[]);
+typedef size_t (*CLI_ReadFunction)(char* str, const size_t max);
+typedef size_t (*CLI_WriteFunction)(const char* format, const va_list params);
 
 typedef struct _CLICommand_
 {
-	char*               Command;
+	const char*         Command;
 	CLI_CommandFunction CmdFunc;
-	char**              Help;
+	const char**        Help;
 } CLICommand;
 
 typedef struct _CLI_
 {
-	char*             Prompt;
-	CLICommand*       CommandList;
+	const char*       Prompt;
+	const CLICommand* CommandList;
 	char              WorkingCommand[MAX_CMD_LINE_LENGTH];
 	CLI_ReadFunction  Read;
 	CLI_WriteFunction Write;
 } CLI;
 
-void         CLI_Init(CLI* cli, char* prompt, CLICommand* cmdList, CLI_ReadFunction read, CLI_WriteFunction write);
-void         CLI_Process(CLI* cli);
-void         CLI_DoCommand(CLI* cli, char* command);
-size_t       CLI_Write(CLI* cli, char* format, ...);
-size_t       CLI_Read(CLI* cli, char* str, size_t max);
+void   CLI_Init(CLI* cli, const char* prompt, const CLICommand* cmdList, const CLI_ReadFunction read, const CLI_WriteFunction write);
+void   CLI_Process(CLI* cli);
+void   CLI_DoCommand(const CLI* cli, const char* command);
+size_t CLI_Write(const CLI* cli, const char* format, ...);
+size_t CLI_Read(const CLI* cli, char* str, const size_t max);
 
-void         CLI_Cmd(CLI* cli, int argc, char* argv[]);
-extern char* CLI_Help[];
+void               CLI_Cmd(const CLI* cli, const size_t argc, const char* argv[]);
+extern const char* CLI_Help[];
 
 #endif
