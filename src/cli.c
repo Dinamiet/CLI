@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define MAX_ARGC            8
+#define MAX_ARGC 8
 
 void CLI_Init(CLI* cli, const char* prompt, const CLICommand* cmdList, const CLI_ReadFunction read, const CLI_WriteFunction write)
 {
@@ -119,7 +119,7 @@ void CLI_Cmd(const CLI* cli, const size_t argc, const char* argv[])
 	if (argc < 2)
 	{
 		CLI_Write(cli, "Available commands:");
-		size_t      index          = 0;
+		size_t index = 0;
 		while (currentCommand->Command)
 		{
 			CLI_Write(cli, (index++ % 4) ? HT "%s" : LF HT "%s", currentCommand->Command);
