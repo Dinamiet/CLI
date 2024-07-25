@@ -1,132 +1,149 @@
 #include "cli.h"
 
-#include <stddef.h>
+#include <stdbool.h>
 #include <string.h>
 
-#define MAX_CMD_LINE_LENGTH 64
-#define MAX_ARGC			8
+#define MAX_ARGC 8
 
-void CLI_Init(CLI* cli, CLICommand* cmdList, InterfaceRead readFunc, InterfaceWrite writeFunc)
+void CLI_Init(CLI* cli, const char* prompt, const CLICommand* cmdList, const CLI_ReadFunction read, const CLI_WriteFunction write)
 {
-	cli->Commands = cmdList;
-	cli->Read	  = readFunc;
-	cli->Write	  = writeFunc;
+	cli->Prompt      = prompt;
+	cli->CommandList = cmdList;
+	cli->Read        = read;
+	cli->Write       = write;
 }
 
-void CLI_ProcessCommand(CLI* cli, char* commandLine)
+void CLI_Process(CLI* cli)
 {
-	static char	  cmdBuffer[MAX_CMD_LINE_LENGTH + 1] = {0}; // add one for '\0'
-	static size_t bufferIndex						 = 0;
-	if (commandLine == NULL) // No command passed to be processed go and read
+	bool   haveCommand   = false;
+	size_t commandLength = strlen(cli->WorkingCommand);
+
+	if (commandLength >= MAX_CMD_LINE_LENGTH)
 	{
-		// Ensure there is space in buffer
-		if (bufferIndex >= MAX_CMD_LINE_LENGTH)
+		CLI_Write(cli, LF "Buffer full, executing..." LF);
+		haveCommand = true;
+	}
+	else
+	{
+		size_t numRead = cli->Read(&cli->WorkingCommand[commandLength], MAX_CMD_LINE_LENGTH - commandLength);
+
+		if (numRead == 0) // Nothing new available
+			return;
+
+		// Handle backspace
+		char* backSpace = strchr(cli->WorkingCommand, '\b');
+		while (backSpace)
 		{
-			cli->Write("Buffer full, executing...\n");
-			commandLine = cmdBuffer;
+			*backSpace     = '\0';
+			uint8_t offset = cli->WorkingCommand[0] == '\0' ? 0 : 1;
+			strcpy(backSpace - offset, backSpace + 1);
+			backSpace = strchr(backSpace - offset, '\b');
 		}
-		else
+
+		// Find command end
+		char* newLine = strchr(cli->WorkingCommand, '\n');
+		if (newLine)
 		{
-			size_t numRead = cli->Read(&cmdBuffer[bufferIndex], MAX_CMD_LINE_LENGTH - bufferIndex);
-
-			if (numRead == 0)
-				return;
-
-			char* backSpace = strchr(cmdBuffer, 0x7F); // Check if backspace in cmd
-			while (backSpace && bufferIndex)
-			{
-				*backSpace = '\0';
-				strcpy(backSpace - 1, backSpace + 1);
-				numRead--;
-				bufferIndex--;
-				cli->Write("\b ");						 // Clear char on interface
-				backSpace = strchr(backSpace - 1, 0x7F); // Search for more backspaces
-			}
-
-			bufferIndex += numRead;
-
-			char* newLine = strchr(cmdBuffer, '\n');
-			if (newLine != NULL) // check for newline in command
-			{
-				*newLine	= '\0'; // terminate command;
-				commandLine = cmdBuffer;
-			}
+			*newLine    = '\0';
+			haveCommand = true;
 		}
 	}
 
-	// There is something to execute
-	if (commandLine != NULL)
+	if (haveCommand)
 	{
-		char*		argv[MAX_ARGC];
-		char*		token = NULL;
-		const char* split = " ";
-		int			argc  = 0;
-
-		token = strtok(commandLine, split);
-		while (token != NULL && argc < MAX_ARGC)
-		{
-			argv[argc++] = token;
-			token		 = strtok(NULL, split);
-		}
-
-		cli->Write("\n");
-		if (argc == 0)
-			goto ClearCmdBuffer;
-
-		CLICommand* currentCommand = cli->Commands;
-		while (currentCommand->Command)
-		{
-			if (strncmp(currentCommand->Command, argv[0], strlen(currentCommand->Command)) == 0) // Match
-			{
-				currentCommand->Callback(cli, argc, argv);
-				goto ClearCmdBuffer;
-			}
-			currentCommand++;
-		}
-
-		cli->Write("Command not found: '");
-		cli->Write(cmdBuffer);
-		cli->Write("'\n");
-	ClearCmdBuffer:
-		memset(cmdBuffer, 0, sizeof(cmdBuffer)); // clear buffer
-		bufferIndex = 0;
+		CLI_DoCommand(cli, cli->WorkingCommand);
+		memset(cli->WorkingCommand, 0, MAX_CMD_LINE_LENGTH);
 	}
-	cli->Write("\r>");
-	cli->Write(cmdBuffer);
+	else
+	{
+		CLI_Write(cli, CR EL_ "%s%s", cli->Prompt, cli->WorkingCommand);
+	}
 }
 
-void CLI_Cmd(CLI* cli, int argc, char* argv[])
+void CLI_DoCommand(const CLI* cli, const char* command)
 {
+	char cmd[MAX_CMD_LINE_LENGTH + 1];
+	if (!command)
+		return;
+
+	strncpy(cmd, command, MAX_CMD_LINE_LENGTH);
+
+	const char* argv[MAX_ARGC];
+	char*       token = NULL;
+	const char* split = " ";
+	size_t      argc  = 0;
+
+	// Tokenize command
+	token = strtok(cmd, split);
+	while (token && argc < MAX_ARGC)
+	{
+		argv[argc++] = token;
+		token        = strtok(NULL, split);
+	}
+
+	CLI_Write(cli, LF);
+	if (argc == 0) // Empty command
+		goto do_command_done;
+
+	const CLICommand* currentCommand = cli->CommandList;
+	while (currentCommand->Command)
+	{
+		if (strcmp(currentCommand->Command, argv[0]) == 0) // Match
+		{
+			currentCommand->CmdFunc(cli, argc, argv); // Call command
+			goto do_command_done;
+		}
+		currentCommand++;
+	}
+
+	CLI_Write(cli, "Command not found: '%s'" LF, argv[0]);
+do_command_done:
+	CLI_Write(cli, CR "%s", cli->Prompt);
+}
+
+size_t CLI_Write(const CLI* cli, const char* format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	size_t written = cli->Write(format, args);
+	va_end(args);
+	return written;
+}
+
+size_t CLI_Read(const CLI* cli, char* str, const size_t max) { return cli->Read(str, max); }
+
+void CLI_Cmd(const CLI* cli, const size_t argc, const char* argv[])
+{
+	const CLICommand* currentCommand = cli->CommandList;
+	// When no args are provided with command - just list all commands
 	if (argc < 2)
 	{
-		cli->Write("Available commands:");
-		CLICommand* currentCommand = cli->Commands;
-		size_t		index		   = 0;
+		CLI_Write(cli, "Available commands:");
+		size_t index = 0;
 		while (currentCommand->Command)
 		{
-			cli->Write((index++ % 4) ? "\t" : "\n\t");
-			cli->Write(currentCommand->Command);
+			CLI_Write(cli, (index++ % 4) ? HT "%s" : LF HT "%s", currentCommand->Command);
 			currentCommand++;
 		}
-		cli->Write("\n");
+		CLI_Write(cli, LF);
 		return;
 	}
 
-	CLICommand* currentCommand = cli->Commands;
+	// Print help for specific command
 	while (currentCommand->Command)
 	{
-		if (strncmp(currentCommand->Command, argv[1], strlen(currentCommand->Command)) == 0) // Match
+		if (strcmp(currentCommand->Command, argv[1]) == 0) // Match
 		{
 			size_t index = 0;
-			while (currentCommand->Help[index] != 0)
-			{
-				cli->Write(currentCommand->Help[index++]);
-				cli->Write("\n");
-			}
+			while (currentCommand->Help[index] != 0) { CLI_Write(cli, "%s" LF, currentCommand->Help[index++]); }
 			return;
 		}
 		currentCommand++;
 	}
 }
 
-char* CLI_Help[] = {"Prints available commands", "Usage: help [cmd]", 0};
+const char* CLI_Help[] = {
+		"Prints available commands",
+		"Usage: help [cmd]",
+		0,
+};
