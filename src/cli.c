@@ -31,13 +31,13 @@ void CLI_Process(CLI* cli)
 			return;
 
 		// Handle backspace
-		char* backSpace = strchr(cli->WorkingCommand, '\b');
+		char* backSpace = strchr(cli->WorkingCommand, '\177');
 		while (backSpace)
 		{
 			*backSpace     = '\0';
 			uint8_t offset = cli->WorkingCommand[0] == '\0' ? 0 : 1;
 			strcpy(backSpace - offset, backSpace + 1);
-			backSpace = strchr(backSpace - offset, '\b');
+			backSpace = strchr(backSpace - offset, '\177');
 		}
 
 		// Find command end
