@@ -39,7 +39,7 @@ typedef size_t (*CLI_ReadFunction)(char* str, const size_t max);
  * \param format The output string, may contain format specifiers
  * \param params The parameters for the format specifiers contained in format
  */
-typedef size_t (*CLI_WriteFunction)(const char* format, const va_list params);
+typedef size_t (*CLI_WriteFunction)(const char* format, va_list params);
 
 /**
  * The CLI Command structure.
