@@ -1,5 +1,6 @@
 #include "cli.h"
 
+#include <assert.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -7,6 +8,12 @@
 
 void CLI_Init(CLI* cli, const char* prompt, const CLICommand* cmdList, const CLI_ReadFunction read, const CLI_WriteFunction write)
 {
+	assert(cli != NULL);
+	assert(prompt != NULL);
+	assert(cmdList != NULL);
+	assert(read != NULL);
+	assert(write != NULL);
+
 	cli->Prompt      = prompt;
 	cli->CommandList = cmdList;
 	cli->Read        = read;
@@ -15,6 +22,8 @@ void CLI_Init(CLI* cli, const char* prompt, const CLICommand* cmdList, const CLI
 
 void CLI_Process(CLI* cli)
 {
+	assert(cli != NULL);
+
 	bool   haveCommand   = false;
 	size_t commandLength = strlen(cli->WorkingCommand);
 
@@ -62,6 +71,8 @@ void CLI_Process(CLI* cli)
 
 void CLI_DoCommand(const CLI* cli, const char* command)
 {
+	assert(cli != NULL);
+
 	char cmd[MAX_CMD_LINE_LENGTH + 1];
 	if (!command)
 		return;
@@ -103,6 +114,9 @@ do_command_done:
 
 size_t CLI_Write(const CLI* cli, const char* format, ...)
 {
+	assert(cli != NULL);
+	assert(format != NULL);
+
 	va_list args;
 	va_start(args, format);
 	size_t written = cli->Write(format, args);
@@ -110,10 +124,19 @@ size_t CLI_Write(const CLI* cli, const char* format, ...)
 	return written;
 }
 
-size_t CLI_Read(const CLI* cli, char* str, const size_t max) { return cli->Read(str, max); }
+size_t CLI_Read(const CLI* cli, char* str, const size_t max)
+{
+	assert(cli != NULL);
+	assert(str != NULL);
+
+	return cli->Read(str, max);
+}
 
 void CLI_Cmd(const CLI* cli, const size_t argc, const char* argv[])
 {
+	assert(cli != NULL);
+	assert(argv != NULL);
+
 	const CLICommand* currentCommand = cli->CommandList;
 	// When no args are provided with command - just list all commands
 	if (argc < 2)
