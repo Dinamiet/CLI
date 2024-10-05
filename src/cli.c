@@ -29,7 +29,7 @@ void CLI_Process(CLI* cli)
 
 	if (commandLength >= MAX_CMD_LINE_LENGTH)
 	{
-		CLI_Write(cli, LF "Buffer full, executing..." LF);
+		CLI_Write(cli, LF "Buffer full, executing..." LF CR);
 		haveCommand = true;
 	}
 	else
@@ -50,7 +50,7 @@ void CLI_Process(CLI* cli)
 		}
 
 		// Find command end
-		char* newLine = strchr(cli->WorkingCommand, '\n');
+		char* newLine = strchr(cli->WorkingCommand, '\r');
 		if (newLine)
 		{
 			*newLine    = '\0';
@@ -92,7 +92,7 @@ void CLI_DoCommand(const CLI* cli, const char* command)
 		token        = strtok(NULL, split);
 	}
 
-	CLI_Write(cli, LF);
+	CLI_Write(cli, LF CR);
 	if (argc == 0) // Empty command
 		goto do_command_done;
 
@@ -107,7 +107,7 @@ void CLI_DoCommand(const CLI* cli, const char* command)
 		currentCommand++;
 	}
 
-	CLI_Write(cli, "Command not found: '%s'" LF, argv[0]);
+	CLI_Write(cli, "Command not found: '%s'" LF CR, argv[0]);
 do_command_done:
 	CLI_Write(cli, CR "%s", cli->Prompt);
 }
@@ -145,10 +145,10 @@ void CLI_Cmd(const CLI* cli, const size_t argc, const char* argv[])
 		size_t index = 0;
 		while (currentCommand->Command)
 		{
-			CLI_Write(cli, (index++ % 4) ? HT "%s" : LF HT "%s", currentCommand->Command);
+			CLI_Write(cli, (index++ % 4) ? HT "%s" : LF CR HT "%s", currentCommand->Command);
 			currentCommand++;
 		}
-		CLI_Write(cli, LF);
+		CLI_Write(cli, LF CR);
 		return;
 	}
 
@@ -158,7 +158,7 @@ void CLI_Cmd(const CLI* cli, const size_t argc, const char* argv[])
 		if (strcmp(currentCommand->Command, argv[1]) == 0) // Match
 		{
 			size_t index = 0;
-			while (currentCommand->Help[index] != 0) { CLI_Write(cli, "%s" LF, currentCommand->Help[index++]); }
+			while (currentCommand->Help[index] != 0) { CLI_Write(cli, "%s" LF CR, currentCommand->Help[index++]); }
 			return;
 		}
 		currentCommand++;
