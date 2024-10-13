@@ -66,11 +66,13 @@ target_include_directories(
 		include
 )
 
+file(GLOB_RECURSE INCLUDE_FILES CONFIGURE_DEPENDS "include/*.h")
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "src/*.c")
+
 target_sources(
 	${PROJECT_NAME}
 	PUBLIC
-		include/cli.h
-        include/ansi_console_codes.h
+		${INCLUDE_FILES}
 	PRIVATE
-		src/cli.c
+		${SOURCE_FILES}
 )
