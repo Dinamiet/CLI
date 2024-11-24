@@ -6,18 +6,18 @@
 
 #define MAX_ARGC 8
 
-void CLI_Init(CLI* cli, const char* prompt, const CLICommand* cmdList, const CLI_ReadFunction read, const CLI_WriteFunction write)
+void CLI_Init(CLI* cli, const char* prompt, const CLICommand* cmdList, const CLI_ReadInterface read_interface, const CLI_WriteInterface write_interface)
 {
 	assert(cli != NULL);
 	assert(prompt != NULL);
 	assert(cmdList != NULL);
-	assert(read != NULL);
-	assert(write != NULL);
+	assert(read_interface != NULL);
+	assert(write_interface != NULL);
 
 	cli->Prompt      = prompt;
 	cli->CommandList = cmdList;
-	cli->Read        = read;
-	cli->Write       = write;
+	cli->Read        = read_interface;
+	cli->Write       = write_interface;
 }
 
 void CLI_Process(CLI* cli)
@@ -101,7 +101,7 @@ void CLI_DoCommand(const CLI* cli, const char* command)
 	{
 		if (strcmp(currentCommand->Command, argv[0]) == 0) // Match
 		{
-			currentCommand->CmdFunc(cli, argc, argv); // Call command
+			currentCommand->Handler(cli, argc, argv); // Call command
 			goto do_command_done;
 		}
 		currentCommand++;
