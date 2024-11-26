@@ -79,7 +79,7 @@ void CLI_DoCommand(const CLI* cli, const char* command)
 
 	strncpy(cmd, command, MAX_CMD_LINE_LENGTH);
 
-	const char* argv[MAX_ARGC];
+	char*       argv[MAX_ARGC];
 	char*       token = NULL;
 	const char* split = " ";
 	size_t      argc  = 0;
@@ -132,7 +132,7 @@ size_t CLI_Read(const CLI* cli, char* str, const size_t max)
 	return cli->Read(str, max);
 }
 
-void CLI_Cmd(const CLI* cli, const size_t argc, const char* argv[])
+void CLI_Cmd(const CLI* cli, const size_t argc, char* const argv[])
 {
 	assert(cli != NULL);
 	assert(argv != NULL);
@@ -165,7 +165,7 @@ void CLI_Cmd(const CLI* cli, const size_t argc, const char* argv[])
 	}
 }
 
-const char* CLI_Help[] = {
+const char* const CLI_Help[] = {
 		"Prints available commands",
 		"Usage: help [cmd]",
 		0,

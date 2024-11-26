@@ -24,7 +24,7 @@ typedef struct _CLI_ CLI;
  * \param argc Number of arguments of the command
  * \param argv Arguments of the command
  */
-typedef void (*CLI_CommandHandler)(const CLI* cli, const size_t argc, const char* argv[]);
+typedef void (*CLI_CommandHandler)(const CLI* cli, const size_t argc, char* const argv[]);
 
 /**
  * The CLI expects to receive data according to this function
@@ -49,7 +49,7 @@ typedef struct _CLICommand_
 {
 	const char*         Command; /** The command which will be used call the function */
 	CLI_CommandHandler  Handler; /** The function to execute when the command is received */
-	const char**        Help;    /** Help information about the command, for example the usage instructions */
+	const char* const*  Help;    /** Help information about the command, for example the usage instructions */
 } CLICommand;
 
 /**
@@ -115,12 +115,12 @@ size_t CLI_Read(const CLI* cli, char* str, const size_t max);
  * \param argc The number of arguments passed
  * \param argv The arguments
  */
-void CLI_Cmd(const CLI* cli, const size_t argc, const char* argv[]);
+void CLI_Cmd(const CLI* cli, const size_t argc, char* const argv[]);
 
 /**
  * The help commands help/information.
  * A NULL terminated array with each element written out in a new line
  */
-extern const char* CLI_Help[];
+extern const char* const CLI_Help[];
 
 #endif
