@@ -94,24 +94,22 @@
 /**
  * Colors
  */
-#define BLACK   0 /** Black console color */
-#define RED     1 /** Red console color */
-#define GREEN   2 /** Green console color */
-#define YELLOW  3 /** Yello console color */
-#define BLUE    4 /** Blue console color */
-#define MAGENTA 5 /** Magenta console color */
-#define CYAN    6 /** Cyan console color */
-#define WHITE   7 /** White console color */
+#define COLOR_BLACK   0 /** Black console color */
+#define COLOR_RED     1 /** Red console color */
+#define COLOR_GREEN   2 /** Green console color */
+#define COLOR_YELLOW  3 /** Yello console color */
+#define COLOR_BLUE    4 /** Blue console color */
+#define COLOR_MAGENTA 5 /** Magenta console color */
+#define COLOR_CYAN    6 /** Cyan console color */
+#define COLOR_WHITE   7 /** White console color */
+#define COLOR_DEFAULT 9 /** Default console color */
 
 #define COLOR_CODE(setting, color) SGR(setting##color) /** Color code escape code helper */
 
-#define ANSI_FG(color)        COLOR_CODE(3, color)  /** Foreground color escape sequence */
-#define ANSI_BG(color)        COLOR_CODE(4, color)  /** Background color escape sequence */
-#define ANSI_BRIGHT_FG(color) COLOR_CODE(9, color)  /** Bright foreground color escape sequence */
-#define ANSI_BRIGHT_BG(color) COLOR_CODE(10, color) /** Bright background color escape sequence */
-
-#define ANSI_DEFAULT_FG SGR(39) /** Default foreground color */
-#define ANSI_DEFAULT_BG SGR(49) /** Default background color */
+#define ANSI_COLOR_FG(color)        COLOR_CODE(3, color)  /** Foreground color escape sequence */
+#define ANSI_COLOR_BG(color)        COLOR_CODE(4, color)  /** Background color escape sequence */
+#define ANSI_COLOR_FG_BRIGHT(color) COLOR_CODE(9, color)  /** Bright foreground color escape sequence */
+#define ANSI_COLOR_BG_BRIGHT(color) COLOR_CODE(10, color) /** Bright background color escape sequence */
 
 #define CLEAR_SCREEN CUP_ ED_ /** Control sequence to clear the screen and place cursor at the start of the screen */
 
